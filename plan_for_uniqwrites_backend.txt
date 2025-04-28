@@ -1,0 +1,98 @@
+Implementation Plan for Uniqwrites Backend (Spring Boot - Maven)
+
+1. Information Gathered:
+- Project is a Spring Boot backend with Maven build.
+- Core modules include:
+  A. User Authentication & Role Management (JWT, Spring Security, OAuth2, BCrypt)
+  B. Dynamic Request Forms per role with dynamic DTO mapping
+  C. Tutoring Service Management (matching, onboarding, scheduling)
+  D. Subscription & Payment Management (Paystack/Flutterwave integration)
+  E. Admin Management Panel (view requests, approve tutors, export PDF)
+  F. PCP Module (student applications, progress tracking, assignments)
+- Database schema uses PostgreSQL with JPA entities and Flyway migrations.
+- Security configuration includes JWT filters, role-based access control, CORS.
+- Integrations with Firebase Firestore, WhatsApp Cloud API/Twilio, Email service.
+- Testing with JUnit, Mockito, Postman; optional CI/CD with GitHub Actions and Docker.
+- Deployment instructions include environment setup, Flyway migration, and running via Maven.
+
+2. Detailed Code Update Plan:
+
+- Project Structure:
+  /src/main/java/com/uniqwrites/
+    - controller/ : REST API controllers for each module
+    - service/ : Business logic services
+    - repository/ : JPA repositories for entities
+    - model/ : JPA entity classes
+    - dto/ : Data Transfer Objects for requests/responses
+    - security/ : JWT, OAuth2, roles, filters, and config classes
+    - UniqwritesApp.java : Main Spring Boot application class
+
+- Modules Implementation:
+  A. Authentication & Role Management
+    - Entities: User, Role enum
+    - Controllers: AuthController (signup, login, roles)
+    - Services: UserService, JwtService, OAuth2Service
+    - Security: JWT filter, password encoder (BCrypt), SecurityConfig
+
+  B. Dynamic Request Forms
+    - DTOs per role (ParentRequestDTO, TeacherApplyDTO, SchoolRequestDTO)
+    - Controllers: RequestFormController
+    - Services: RequestFormService
+    - Optional: Dynamic form schema endpoint
+
+  C. Tutoring Service Management
+    - Entities: TutorProfile, ParentRequest, ProgressReport
+    - Controllers: TutorController, ParentController
+    - Services: TutorService, MatchingService, SchedulingService
+
+  D. Subscription & Payment Management
+    - Entities: PaymentRecord, Subscription
+    - Controllers: SubscriptionController, PaymentController, AdminPaymentController
+    - Services: PaymentService, SubscriptionService, PaymentGatewayIntegrationService
+
+  E. Admin Management Panel
+    - Controllers: AdminController
+    - Services: AdminService, PDFExportService
+    - Features: Approve tutors, view requests, export PDF
+
+  F. PCP Module
+    - Entities: PCPStudent, ProgressReport
+    - Controllers: PCPController
+    - Services: PCPService
+
+- Database:
+  - Use JPA annotations for entities
+  - Flyway migration scripts for schema setup and updates
+
+- Security:
+  - JWT generation and validation
+  - Role-based access control with @PreAuthorize
+  - CORS configuration
+
+- Integrations:
+  - Firebase Admin SDK for Firestore updates
+  - NotificationService for WhatsApp/Twilio and Email dispatch
+
+- Testing:
+  - Unit tests with JUnit and Mockito for services and controllers
+  - Postman collections for API endpoint testing
+
+- Deployment:
+  - Environment variables configuration
+  - Flyway migration on startup
+  - Run with ./mvnw spring-boot:run
+
+3. Dependent Files to be Created/Edited:
+- pom.xml (dependencies for Spring Boot, Security, JWT, OAuth2, Firebase, etc.)
+- application.yml (configuration for datasource, JWT, Firebase, etc.)
+- Java source files under src/main/java/com/uniqwrites/ as per above structure
+- Flyway migration scripts under src/main/resources/db/migration/
+- Postman collection files (optional)
+
+4. Follow-up Steps:
+- Implement modules incrementally with unit tests
+- Integrate and test external services (Firebase, payment gateways)
+- Perform end-to-end testing with Postman
+- Prepare deployment scripts and documentation
+
+This plan covers the full scope of your backend project as described. Please confirm if you approve this plan or if you want me to adjust or add anything before I start implementation.

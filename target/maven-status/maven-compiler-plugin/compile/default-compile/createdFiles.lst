@@ -1,0 +1,17 @@
+com\uniqwrites\dto\TeacherApplyDTO.class
+com\uniqwrites\service\UserService.class
+com\uniqwrites\security\CustomUserDetailsService.class
+com\uniqwrites\controller\AuthController.class
+com\uniqwrites\dto\SignupRequestDTO.class
+com\uniqwrites\service\RequestFormService.class
+com\uniqwrites\dto\SchoolRequestDTO.class
+com\uniqwrites\model\Role.class
+com\uniqwrites\security\JwtAuthenticationFilter.class
+com\uniqwrites\security\SecurityConfig.class
+com\uniqwrites\UniqwritesApp.class
+com\uniqwrites\model\User.class
+com\uniqwrites\dto\ParentRequestDTO.class
+com\uniqwrites\security\JwtUtil.class
+com\uniqwrites\dto\LoginRequestDTO.class
+com\uniqwrites\repository\UserRepository.class
+com\uniqwrites\controller\RequestFormController.class
