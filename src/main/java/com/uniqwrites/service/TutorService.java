@@ -8,11 +8,15 @@ import org.springframework.stereotype.Service;
 public class TutorService {
 
     public void applyForJob(ApplicationRequestDTO request) {
-        // TODO: Implement application submission logic
+        // Example implementation: process tutor job application
+        System.out.println("Tutor applying for job with details: " + request.toString());
+        // TODO: Add database save logic here
     }
 
     public void updateAvailability(AvailabilityDTO availability) {
-        // TODO: Implement availability update logic
+        // Example implementation: update tutor availability
+        System.out.println("Updating tutor availability: " + availability.toString());
+        // TODO: Add database update logic here
     }
 
     // Additional methods for retrieving available requests and assigned students can be added here

@@ -8,15 +8,20 @@ import org.springframework.stereotype.Service;
 public class StudentService {
 
     public void submitTutoringRequest(TutoringRequestDTO request) {
-        // TODO: Implement tutoring request submission logic
+        // Example implementation: process tutoring request submission
+        System.out.println("Submitting tutoring request: " + request.toString());
+        // TODO: Add database save logic here
     }
 
     public String getProgressReport() {
-        // TODO: Implement progress report retrieval logic
+        // Example implementation: return progress report
+        System.out.println("Retrieving progress report");
         return "Progress report";
     }
 
     public void updateProfile(UpdateProfileDTO updatedFields) {
-        // TODO: Implement profile update logic
+        // Example implementation: update student profile
+        System.out.println("Updating student profile: " + updatedFields.toString());
+        // TODO: Add database update logic here
     }
 }

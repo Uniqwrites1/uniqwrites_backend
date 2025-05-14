@@ -2,6 +2,8 @@ package com.uniqwrites.service;
 
 import com.uniqwrites.dto.AssignTutorDTO;
 import com.uniqwrites.model.User;
+import com.uniqwrites.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,21 +11,30 @@ import java.util.List;
 @Service
 public class AdminService {
 
+    @Autowired
+    private UserRepository userRepository;
+
     public List<User> getAllUsers() {
-        // TODO: Implement retrieval of all users
-        return null;
+        return userRepository.findAll();
     }
 
     public void assignTutor(AssignTutorDTO assignTutorDTO) {
-        // TODO: Implement tutor assignment logic
+        // Example implementation: assign tutor to student logic
+        // This is a placeholder; actual implementation depends on business rules and data model
+        System.out.println("Assigning tutor with ID " + assignTutorDTO.getTutorId() +
+                " to student with ID " + assignTutorDTO.getStudentId());
+        // TODO: Add database update logic here
     }
 
     public Object getPendingRequests() {
-        // TODO: Implement retrieval of all pending service requests
+        // Example implementation: retrieve all pending service requests
+        // This is a placeholder; actual implementation depends on data model and repository
+        System.out.println("Retrieving all pending service requests");
+        // TODO: Query database for pending requests and return
         return null;
     }
 
     public void deleteUser(Long id) {
-        // TODO: Implement user deletion logic
+        userRepository.deleteById(id);
     }
 }
