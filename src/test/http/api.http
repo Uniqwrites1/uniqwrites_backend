@@ -1,0 +1,247 @@
+### Environment variables
+@baseUrl = http://localhost:8080
+@accessToken = your_jwt_token_here
+@teacherToken = your_teacher_token_here
+@parentToken = your_parent_token_here
+@adminToken = your_admin_token_here
+
+### 1. Authentication Tests
+
+# 1.1 Register a new admin user
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "email": "admin@example.com",
+    "password": "admin123",
+    "name": "Admin User",
+    "role": "ADMIN"
+}
+
+### Login as Admin
+# @name loginAdmin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "admin@example.com",
+    "password": "admin123"
+}
+
+### Store the admin token from the login response
+@adminToken = {{loginAdmin.response.body.accessToken}}
+
+# Login
+# @name loginUser
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "user@example.com",
+    "password": "password123"
+}
+
+### Store the access token from the login response
+@accessToken = {{loginUser.response.body.accessToken}}
+
+# Register Student
+POST {{baseUrl}}/auth/register/student
+Content-Type: application/json
+
+{
+    "email": "student@example.com",
+    "password": "password123",
+    "fullName": "Student Name",
+    "phone": "1234567890",
+    "grade": "10",
+    "subjects": ["Math", "Science"]
+}
+
+### Login as Student/Parent
+# @name loginParent
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "student@example.com",
+    "password": "password123"
+}
+
+### Store the parent token from the login response
+@parentToken = {{loginParent.response.body.accessToken}}
+
+# Register Tutor
+POST {{baseUrl}}/auth/register/tutor
+Content-Type: application/json
+
+{
+    "email": "tutor@example.com",
+    "password": "password123",
+    "fullName": "Tutor Name",
+    "phone": "1234567890",
+    "qualifications": "Masters in Education",
+    "subjects": ["Math", "Science"],
+    "experience": "5 years"
+}
+
+### Login as Tutor
+# @name loginTutor
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "tutor@example.com",
+    "password": "password123"
+}
+
+### Store the teacher token from the login response
+@teacherToken = {{loginTutor.response.body.accessToken}}
+
+### Initiative Endpoints
+
+# Admin Blog Post (extra APIs)
+POST {{baseUrl}}/admin/blog
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+    "title": "New Teaching Methods",
+    "content": "Here are some effective teaching methods...",
+    "author": "Admin User",
+    "published": true
+}
+
+# Admin Delete Blog
+DELETE {{baseUrl}}/admin/blog/1
+Authorization: Bearer {{adminToken}}
+
+### Resource Management
+
+# Upload resource
+POST {{baseUrl}}/teacher/resources
+Authorization: Bearer {{teacherToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="file"; filename="test.pdf"
+Content-Type: application/pdf
+
+< ./test.pdf
+------WebKitFormBoundary
+Content-Disposition: form-data; name="type"
+
+document
+------WebKitFormBoundary
+Content-Disposition: form-data; name="description"
+
+Test document
+------WebKitFormBoundary--
+
+# Get resources by teacher
+GET {{baseUrl}}/parent/resources/1
+Authorization: Bearer {{parentToken}}
+
+### Tutor Management
+
+# Get tutor dashboard
+GET {{baseUrl}}/dashboard
+Authorization: Bearer {{teacherToken}}
+
+# Update tutor availability
+PUT {{baseUrl}}/teacher/settings
+Authorization: Bearer {{teacherToken}}
+Content-Type: application/json
+
+{
+    "availableDays": ["MONDAY", "WEDNESDAY", "FRIDAY"],
+    "availableTimeSlots": ["MORNING", "AFTERNOON"]
+}
+
+# Apply for tutoring job
+POST {{baseUrl}}/jobs/1/apply
+Authorization: Bearer {{teacherToken}}
+Content-Type: application/json
+
+{
+    "message": "I am interested in this teaching position",
+    "availability": ["Monday", "Wednesday", "Friday"],
+    "preferredTime": "Afternoon"
+}
+
+### Student Management
+
+# Submit tutoring request
+POST {{baseUrl}}/parent/requests
+Authorization: Bearer {{parentToken}}
+Content-Type: application/json
+
+{
+    "subject": "Mathematics",
+    "grade": "10",
+    "childName": "Student Name",
+    "childAge": "10",
+    "requestDetails": "Need help with Algebra on Monday and Wednesday afternoons"
+}
+
+### Admin Management
+
+# Get all pending tutor applications
+GET {{baseUrl}}/admin/tutors/pending
+Authorization: Bearer {{adminToken}}
+
+# Approve/Reject tutor
+PUT {{baseUrl}}/admin/tutors/{tutorId}/status
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+    "status": "APPROVED",
+    "remarks": "Application approved"
+}
+
+# Submit feedback (specified in requirements)
+POST {{baseUrl}}/feedback
+Authorization: Bearer {{parentToken}}
+Content-Type: application/json
+
+{
+    "rating": 5,
+    "comments": "The teacher was excellent",
+    "teacherId": 1
+}
+
+### Public Endpoints
+
+# Get available courses
+GET {{baseUrl}}/api/public/courses
+
+# Get testimonials
+GET {{baseUrl}}/api/public/testimonials
+
+### Test Teacher Application (specified in requirements)
+POST {{baseUrl}}/teacher/apply
+Authorization: Bearer {{teacherToken}}
+Content-Type: application/json
+
+{
+    "teacherName": "Teacher User",
+    "qualifications": "Masters in Education",
+    "experienceYears": "5",
+    "subjects": "Mathematics, Science"
+}
+
+### Test School Request Form (specified in requirements)
+POST {{baseUrl}}/school/request
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+    "schoolName": "Example School",
+    "contactPerson": "School Admin",
+    "contactEmail": "school@example.com",
+    "requestDetails": "Need math and science teachers"
+}
+
+### Test CORS and Authentication
+# Attempt to access protected endpoint without token
+GET {{baseUrl}}/dashboard

@@ -1,0 +1,225 @@
+### Environment variables
+@baseUrl = http://localhost:8080
+@accessToken = your_jwt_token_here
+@teacherToken = your_teacher_token_here
+@parentToken = your_parent_token_here
+@adminToken = your_admin_token_here
+
+################################
+### 1. Authentication Tests ###
+################################
+
+### 1.1 Register a new user (specified in requirements)
+# @name registerUser
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "name": "Test User",
+    "email": "user@example.com",
+    "password": "password123",
+    "role": "PARENT"
+}
+
+### 1.2 Login (specified in requirements)
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "user@example.com",
+    "password": "password123"
+}
+
+### Save the token from the login response
+@accessToken = {{login.response.body.accessToken}}
+
+### 1.3 Student Registration (Parent)
+POST {{baseUrl}}/auth/register/student
+Content-Type: application/json
+
+{
+    "name": "Student User",
+    "email": "student@example.com",
+    "password": "password123",
+    "role": "STUDENT" 
+}
+
+### 1.4 Teacher Registration (for teacher application requirement)
+POST {{baseUrl}}/auth/register/tutor
+Content-Type: application/json
+
+{
+    "name": "Teacher User",
+    "email": "teacher@example.com",
+    "password": "password123",
+    "role": "TUTOR",
+    "qualifications": "Masters in Education",
+    "subjects": ["Math", "Science"],
+    "experience": "5 years"
+}
+
+### 1.5 Login as Teacher
+# @name loginTeacher
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "teacher@example.com",
+    "password": "password123"
+}
+
+### Save teacher token
+@teacherToken = {{loginTeacher.response.body.accessToken}}
+
+################################
+### 2. Required Form Submissions ###
+################################
+
+### 2.1 Parent Request Form (specified in requirements)
+POST {{baseUrl}}/parent/requests
+Authorization: Bearer {{parentToken}}
+Content-Type: application/json
+
+{
+    "parentName": "Parent User",
+    "childName": "Child User",
+    "childAge": "10",
+    "requestDetails": "Need math tutoring on weekends"
+}
+
+### 2.2 Teacher Application (specified in requirements)
+POST {{baseUrl}}/teacher/apply
+Authorization: Bearer {{teacherToken}}
+Content-Type: application/json
+
+{
+    "teacherName": "Teacher User",
+    "qualifications": "Masters in Education",
+    "experienceYears": "5",
+    "subjects": "Mathematics, Science"
+}
+
+### 2.3 School Request Form (specified in requirements)
+POST {{baseUrl}}/school/request
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+    "schoolName": "Example School",
+    "contactPerson": "School Admin",
+    "contactEmail": "school@example.com",
+    "requestDetails": "Need math and science teachers"
+}
+
+################################
+### 3. Dashboard Data (specified in requirements) ###
+################################
+
+### 3.1 Teacher Dashboard
+GET {{baseUrl}}/dashboard
+Authorization: Bearer {{teacherToken}}
+
+### 3.2 Parent Dashboard
+GET {{baseUrl}}/dashboard
+Authorization: Bearer {{parentToken}}
+
+### 3.3 Admin Dashboard
+GET {{baseUrl}}/dashboard
+Authorization: Bearer {{adminToken}}
+
+################################
+### 4. Job Application (specified in requirements) ###
+################################
+
+### 4.1 Apply to a job
+POST {{baseUrl}}/jobs/1/apply
+Authorization: Bearer {{teacherToken}}
+Content-Type: application/json
+
+{
+    "message": "I am interested in this teaching position",
+    "availability": ["Monday", "Wednesday", "Friday"],
+    "preferredTime": "Afternoon" 
+}
+
+################################
+### 5. Feedback Submission (specified in requirements) ###
+################################
+
+### 5.1 Submit feedback
+POST {{baseUrl}}/feedback
+Authorization: Bearer {{parentToken}}
+Content-Type: application/json
+
+{
+    "rating": 5,
+    "comments": "The teacher was excellent",
+    "teacherId": 1
+}
+
+################################
+### 6. Admin Blog Management (extra APIs) ###
+################################
+
+### 6.1 Create Blog
+POST {{baseUrl}}/admin/blog
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+    "title": "New Teaching Methods",
+    "content": "Here are some effective teaching methods...",
+    "author": "Admin User",
+    "published": true
+}
+
+### 6.2 Delete Blog
+DELETE {{baseUrl}}/admin/blog/1
+Authorization: Bearer {{adminToken}}
+
+################################
+### 7. Resource Management (extra APIs) ###
+################################
+
+### 7.1 Teacher Resource Upload
+POST {{baseUrl}}/teacher/resources
+Authorization: Bearer {{teacherToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="file"; filename="test.pdf"
+Content-Type: application/pdf
+
+< ./test.pdf
+------WebKitFormBoundary
+Content-Disposition: form-data; name="type"
+
+DOCUMENT
+------WebKitFormBoundary
+Content-Disposition: form-data; name="description"
+
+Test lesson resource
+------WebKitFormBoundary--
+
+### 7.2 Parent Get Teacher Resources
+GET {{baseUrl}}/parent/resources/1
+Authorization: Bearer {{parentToken}}
+
+################################
+### 8. Testing for CORS and Authentication ###
+################################
+
+### 8.1 Attempt to access protected endpoint without token
+GET {{baseUrl}}/dashboard
+
+### 8.2 Attempt to access admin endpoint with teacher token
+GET {{baseUrl}}/admin/blog
+Authorization: Bearer {{teacherToken}}
+
+################################
+### 9. Public Endpoints ###
+################################
+
+### 9.1 Get public info
+GET {{baseUrl}}/api/public/info

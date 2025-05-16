@@ -1,5 +1,6 @@
 package com.uniqwrites.controller;
 
+import com.uniqwrites.dto.AuthResponseDTO;
 import com.uniqwrites.dto.LoginRequestDTO;
 import com.uniqwrites.dto.SignupRequestDTO;
 import com.uniqwrites.model.Role;
@@ -19,29 +20,40 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
 
     @Autowired
     private UserService userService;
+    
+    @GetMapping("/test")
+    public ResponseEntity<?> testEndpoint() {
+        return ResponseEntity.ok().body("Authentication API is working!");
+    }
 
     @Autowired
     private JwtUtil jwtUtil;
 
     @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @PostMapping("/signup")
+    private AuthenticationManager authenticationManager;    @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignupRequestDTO signupRequest) {
         try {
             User user = userService.registerUser(signupRequest);
-            return ResponseEntity.ok("User registered successfully");
+            // Generate token for auto-login after signup
+            String token = jwtUtil.generateToken(user.getEmail());
+            
+            AuthResponseDTO response = AuthResponseDTO.success(
+                token,
+                user.getRole().name(),
+                user.getName(),
+                user.getEmail()
+            );
+            
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(AuthResponseDTO.error(e.getMessage()));
         }
-    }
-
-    @PostMapping("/login")
+    }    @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequest) {
         try {
             authenticationManager.authenticate(
@@ -49,13 +61,68 @@ public class AuthController {
             );
             Optional<User> userOpt = userService.authenticateUser(loginRequest);
             if (userOpt.isPresent()) {
-                String token = jwtUtil.generateToken(userOpt.get().getEmail());
-                return ResponseEntity.ok(token);
+                User user = userOpt.get();
+                String token = jwtUtil.generateToken(user.getEmail());
+                
+                AuthResponseDTO response = AuthResponseDTO.success(
+                    token, 
+                    user.getRole().name(), 
+                    user.getName(), 
+                    user.getEmail()
+                );
+                
+                return ResponseEntity.ok(response);
             } else {
                 throw new BadCredentialsException("Invalid credentials");
             }
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(401).body(AuthResponseDTO.error("Invalid email or password"));
         } catch (Exception e) {
-            return ResponseEntity.status(401).body("Invalid email or password");
+            return ResponseEntity.status(500).body(AuthResponseDTO.error("Authentication error: " + e.getMessage()));
+        }
+    }
+      /**
+     * Handle Google login requests
+     */
+    @PostMapping("/google/login")
+    public ResponseEntity<?> googleLogin(@RequestBody Object googleLoginRequest) {
+        try {
+            // This is a placeholder - implement actual Google login logic
+            // For now, create a mock success response
+            AuthResponseDTO response = new AuthResponseDTO();
+            response.setSuccess(true);
+            response.setToken("mock_token_for_google_login");
+            response.setMessage("Google login successful");
+            response.setRole("STUDENT");
+            response.setName("Google User");
+            response.setEmail("google_user@example.com");
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(AuthResponseDTO.error("Google authentication failed: " + e.getMessage()));
+        }
+    }
+    
+    /**
+     * Handle forgot password requests
+     */    @PostMapping("/forgot-password") 
+    public ResponseEntity<?> forgotPassword(@RequestBody Object forgotPasswordRequest) {
+        try {
+            // This is a placeholder - implement actual forgot password logic
+            return ResponseEntity.ok(
+                new AuthResponseDTO(
+                    true, 
+                    null, 
+                    "Password reset email sent", 
+                    null, 
+                    null, 
+                    null
+                )
+            );
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(
+                AuthResponseDTO.error("Failed to process password reset request: " + e.getMessage())
+            );
         }
     }
 

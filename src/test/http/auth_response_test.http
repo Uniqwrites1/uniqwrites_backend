@@ -1,0 +1,47 @@
+# Auth Endpoints Testing
+
+### Test auth formatting
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+### Test auth with direct path
+POST http://localhost:8080/signup
+Content-Type: application/json
+
+{
+  "name": "Test User",
+  "email": "newuser@example.com",
+  "password": "password123",
+  "role": "STUDENT"
+}
+
+### Test auth with API path
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+### Test Google auth
+POST http://localhost:8080/google/login
+Content-Type: application/json
+
+{
+  "token": "google_id_token",
+  "email": "google_user@gmail.com"
+}
+
+### Test forgot password
+POST http://localhost:8080/forgot-password
+Content-Type: application/json
+
+{
+  "email": "test@example.com"
+}

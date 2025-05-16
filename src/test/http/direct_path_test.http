@@ -1,0 +1,48 @@
+# HTTP Test for Direct Path Endpoints
+
+### Test direct login endpoint
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+### Test direct signup endpoint
+POST http://localhost:8080/signup
+Content-Type: application/json
+
+{
+  "name": "Test User",
+  "email": "test@example.com",
+  "password": "password123",
+  "role": "STUDENT"
+}
+
+### Test direct Google login endpoint
+POST http://localhost:8080/google/login
+Content-Type: application/json
+
+{
+  "token": "sample_google_token",
+  "email": "test@gmail.com"
+}
+
+### Test direct forgot password endpoint
+POST http://localhost:8080/forgot-password
+Content-Type: application/json
+
+{
+  "email": "test@example.com"
+}
+
+### Test with Origin header (CORS check)
+POST http://localhost:8080/login
+Content-Type: application/json
+Origin: http://localhost:5173
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}

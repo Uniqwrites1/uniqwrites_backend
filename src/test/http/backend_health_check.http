@@ -1,0 +1,90 @@
+### Environment variables
+@baseUrl = http://localhost:8080
+
+################################
+### Test Endpoints ###
+################################
+
+### Check if backend is running
+GET {{baseUrl}}/api/test/public
+
+### Test CORS functionality
+GET {{baseUrl}}/api/test/cors-test
+Origin: http://localhost:5173
+
+### Test authentication endpoint
+GET {{baseUrl}}/api/auth/test
+
+### Register new user
+POST {{baseUrl}}/api/auth/signup
+Content-Type: application/json
+
+{
+  "name": "Test User",
+  "email": "test@example.com",
+  "password": "Password123!",
+  "role": "STUDENT"
+}
+
+### Login
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "Password123!"
+}
+
+### Store token from login response
+@token = {{login.response.body.accessToken}}
+
+### Try protected endpoint with token
+GET {{baseUrl}}/api/test/protected
+Authorization: Bearer {{token}}
+
+### Submit parent request
+POST {{baseUrl}}/parent/requests
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "parentName": "Test Parent",
+  "childName": "Test Child",
+  "childAge": "10",
+  "requestDetails": "Need help with mathematics"
+}
+
+### Submit teacher application
+POST {{baseUrl}}/teacher/apply
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "teacherName": "Test Teacher",
+  "qualifications": "Masters in Education",
+  "experienceYears": "5",
+  "subjects": "Mathematics, Science"
+}
+
+### Submit school request
+POST {{baseUrl}}/school/request
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "schoolName": "Test School",
+  "contactPerson": "School Admin",
+  "contactEmail": "school@example.com",
+  "requestDetails": "Need math and science teachers"
+}
+
+### Test dashboard access
+GET {{baseUrl}}/dashboard
+Authorization: Bearer {{token}}
+
+### Test CORS (browser will check preflight)
+OPTIONS {{baseUrl}}/api/test/public
+Origin: http://localhost:5173
+Access-Control-Request-Method: GET
+Access-Control-Request-Headers: Content-Type

@@ -1,0 +1,282 @@
+### Environment variables
+@baseUrl = http://localhost:8080
+@studentToken = # login as student first
+@tutorToken = # login as tutor first
+@adminToken = # login as admin first
+@parentToken = # login as parent first
+
+################################
+### 1. Authentication Tests ###
+################################
+
+### 1.1 Register as Student
+POST {{baseUrl}}/auth/register/student
+Content-Type: application/json
+
+{
+    "name": "Test Student",
+    "email": "student@test.com",
+    "password": "Test123!",
+    "role": "STUDENT"
+}
+
+### 1.2 Register as Tutor
+POST {{baseUrl}}/auth/register/tutor
+Content-Type: application/json
+
+{
+    "name": "Test Tutor",
+    "email": "tutor@test.com",
+    "password": "Test123!",
+    "role": "TUTOR"
+}
+
+### 1.3 Login with Student
+# @name loginStudent
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "student@test.com",
+    "password": "Test123!"
+}
+
+### Store student token
+@studentToken = {{loginStudent.response.body.*}}
+
+### 1.4 Login with Tutor
+# @name loginTutor
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "tutor@test.com",
+    "password": "Test123!"
+}
+
+### Store tutor token
+@tutorToken = {{loginTutor.response.body.*}}
+
+### 1.5 Get available roles
+GET {{baseUrl}}/auth/roles
+
+################################
+### 2. Student Endpoints Tests ###
+################################
+
+### 2.1 Get student dashboard
+GET {{baseUrl}}/api/student/dashboard
+Authorization: Bearer {{studentToken}}
+
+### 2.2 Submit tutoring request
+POST {{baseUrl}}/api/student/book-service
+Authorization: Bearer {{studentToken}}
+Content-Type: application/json
+
+{
+    "subject": "Mathematics",
+    "grade": "10",
+    "description": "Need help with Algebra",
+    "preferredDays": ["MONDAY", "WEDNESDAY"],
+    "preferredTimes": ["AFTERNOON"]
+}
+
+### 2.3 Get progress report
+GET {{baseUrl}}/api/student/progress
+Authorization: Bearer {{studentToken}}
+
+### 2.4 Update student profile
+PUT {{baseUrl}}/api/student/settings
+Authorization: Bearer {{studentToken}}
+Content-Type: application/json
+
+{
+    "updatedFields": {
+        "phone": "1234567890",
+        "grade": "11"
+    }
+}
+
+################################
+### 3. Tutor Endpoints Tests ###
+################################
+
+### 3.1 Get tutor dashboard
+GET {{baseUrl}}/api/tutor/dashboard
+Authorization: Bearer {{tutorToken}}
+
+### 3.2 Update tutor availability
+PUT {{baseUrl}}/api/tutor/settings
+Authorization: Bearer {{tutorToken}}
+Content-Type: application/json
+
+{
+    "availabilitySchedule": {
+        "monday": ["9:00-12:00", "13:00-17:00"],
+        "wednesday": ["9:00-12:00", "13:00-17:00"]
+    }
+}
+
+### 3.3 Apply for tutoring job
+POST {{baseUrl}}/api/tutor/apply
+Authorization: Bearer {{tutorToken}}
+Content-Type: application/json
+
+{
+    "requestId": 1,
+    "message": "I would like to apply for this position"
+}
+
+### 3.4 Get assigned students
+GET {{baseUrl}}/api/tutor/assigned-students
+Authorization: Bearer {{tutorToken}}
+
+################################
+### 4. Resource Management Tests ###
+################################
+
+### 4.1 Upload file resource
+POST {{baseUrl}}/api/teacher/resources/upload
+Authorization: Bearer {{tutorToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="file"; filename="test.pdf"
+Content-Type: application/pdf
+
+< ./test.pdf
+------WebKitFormBoundary
+Content-Disposition: form-data; name="type"
+
+FILE
+------WebKitFormBoundary
+Content-Disposition: form-data; name="description"
+
+Test PDF resource
+------WebKitFormBoundary--
+
+### 4.2 Upload YouTube resource
+POST {{baseUrl}}/api/teacher/resources/upload
+Authorization: Bearer {{tutorToken}}
+Content-Type: application/json
+
+{
+    "type": "YOUTUBE_LINK",
+    "youtubeUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "description": "Test YouTube video"
+}
+
+### 4.3 Get resources by job
+GET {{baseUrl}}/api/resources/job/1
+Authorization: Bearer {{tutorToken}}
+
+################################
+### 5. Initiative Tests ###
+################################
+
+### 5.1 Submit sponsor initiative
+POST {{baseUrl}}/api/initiatives/submit
+Content-Type: application/json
+
+{
+    "initiativeName": "Education Support Program",
+    "submissionType": "SPONSOR",
+    "fullName": "John Sponsor",
+    "email": "sponsor@test.com",
+    "phone": "1234567890",
+    "message": "I would like to sponsor students",
+    "sponsorshipType": "One-time"
+}
+
+### 5.2 Submit volunteer initiative
+POST {{baseUrl}}/api/initiatives/submit
+Content-Type: application/json
+
+{
+    "initiativeName": "Volunteer Teaching Program",
+    "submissionType": "VOLUNTEER",
+    "fullName": "Jane Volunteer",
+    "email": "volunteer@test.com",
+    "phone": "1234567890",
+    "message": "I would like to volunteer as a teacher",
+    "skills": "Mathematics, Science",
+    "availability": "Weekday afternoons"
+}
+
+################################
+### 6. Admin Endpoints Tests ###
+################################
+
+### 6.1 Get all users
+GET {{baseUrl}}/api/admin/users
+Authorization: Bearer {{adminToken}}
+
+### 6.2 Review pending requests
+GET {{baseUrl}}/api/admin/requests
+Authorization: Bearer {{adminToken}}
+
+### 6.3 Assign tutor to student
+POST {{baseUrl}}/api/admin/assign-job
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+    "studentId": 1,
+    "tutorId": 2
+}
+
+### 6.4 Approve teacher
+POST {{baseUrl}}/api/admin/approve-teacher
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+    "teacherId": 1
+}
+
+################################
+### 7. Error Cases Tests ###
+################################
+
+### 7.1 Login with invalid credentials
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "invalid@test.com",
+    "password": "wrongpassword"
+}
+
+### 7.2 Access protected endpoint without token
+GET {{baseUrl}}/api/student/dashboard
+
+### 7.3 Access admin endpoint with student token
+GET {{baseUrl}}/api/admin/users
+Authorization: Bearer {{studentToken}}
+
+### 7.4 Submit invalid initiative
+POST {{baseUrl}}/api/initiatives/submit
+Content-Type: application/json
+
+{
+    "submissionType": "INVALID"
+}
+
+################################
+### 8. Public Endpoints Tests ###
+################################
+
+### 8.1 Get public info
+GET {{baseUrl}}/api/public/info
+
+### 8.2 Get public resources
+GET {{baseUrl}}/api/public/resources
+
+### 8.3 Get public blogs
+GET {{baseUrl}}/api/public/blogs
+
+### 8.4 Get tutoring info
+GET {{baseUrl}}/api/public/tutoring-info
+
+### 8.5 Get public initiatives
+GET {{baseUrl}}/api/public/initiatives

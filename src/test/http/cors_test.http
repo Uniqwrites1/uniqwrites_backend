@@ -1,0 +1,44 @@
+### CORS Test - Get without Auth
+GET http://localhost:8080/api/test/cors-test
+Origin: http://localhost:5173
+Accept: application/json
+
+### CORS Test - Public endpoint
+GET http://localhost:8080/api/test/public
+Origin: http://localhost:5173
+Accept: application/json
+
+### CORS Test - Echo endpoint
+POST http://localhost:8080/api/test/echo
+Origin: http://localhost:5173
+Content-Type: application/json
+Accept: application/json
+
+{
+  "message": "Testing CORS with POST request",
+  "timestamp": "{{$timestamp}}"
+}
+
+### CORS Test - Auth login endpoint
+POST http://localhost:8080/api/auth/login
+Origin: http://localhost:5173
+Content-Type: application/json
+Accept: application/json
+
+{
+  "username": "test@example.com",
+  "password": "password123"
+}
+
+### CORS Test - Auth signup endpoint
+POST http://localhost:8080/api/auth/signup
+Origin: http://localhost:5173
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Test User",
+  "email": "test@example.com",
+  "password": "password123",
+  "role": "STUDENT"
+}
