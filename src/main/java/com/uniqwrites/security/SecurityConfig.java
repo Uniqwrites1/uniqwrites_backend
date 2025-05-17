@@ -17,6 +17,9 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
+import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizationRequestRepository;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -31,10 +34,13 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-
+    private JwtAuthenticationFilter jwtAuthenticationFilter;    @Autowired
+    private UserDetailsService userDetailsService;
+    
     @Autowired
-    private UserDetailsService userDetailsService;    @Bean
+    private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    
+    @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
@@ -62,6 +68,11 @@ public class SecurityConfig {
                 .and()
                 .build();
     }    @Bean
+    public AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequestRepository() {
+        return new HttpSessionOAuth2AuthorizationRequestRepository();
+    }
+    
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // First explicitly handle OPTIONS requests for preflight
         http
@@ -69,13 +80,26 @@ public class SecurityConfig {
             .cors().and()  // This uses the corsConfigurationSource bean if defined
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
-            .authorizeRequests()
-                // Handle preflight OPTIONS requests
-                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()                // Public endpoints
+            .oauth2Login()
+                .authorizationEndpoint()
+                    .baseUri("/oauth2/authorize")
+                    .authorizationRequestRepository(authorizationRequestRepository())
+                    .and()
+                .redirectionEndpoint()
+                    .baseUri("/oauth2/callback/*")
+                    .and()
+                .successHandler(oAuth2AuthenticationSuccessHandler)
+                .and()
+            .authorizeRequests()// Handle preflight OPTIONS requests
+                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // Public endpoints
                 .antMatchers("/", "/api/public/**", "/resources/**", "/static/**", "/css/**", "/js/**").permitAll()
-                .antMatchers("/api/auth/**", "/auth/**").permitAll()
-                // Direct auth endpoints for frontend compatibility
-                .antMatchers("/signup", "/login", "/google/login", "/forgot-password").permitAll()
+                .antMatchers("/api/auth/**", "/auth/**").permitAll()                // Direct auth endpoints for frontend compatibility
+                .antMatchers("/signup", "/login", "/google/login", "/forgot-password", "/reset-password", "/validate-reset-token").permitAll()
+                // API-prefixed endpoints for frontend compatibility
+                .antMatchers("/api/signup", "/api/login", "/api/google/login", "/api/forgot-password", "/api/reset-password", "/api/validate-reset-token").permitAll()
+                // OAuth2 endpoints
+                .antMatchers("/oauth2/**").permitAll()
                 .antMatchers("/api/test/public", "/api/test/echo", "/api/test/cors-test").permitAll()
                 .antMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 // Role-based endpoints

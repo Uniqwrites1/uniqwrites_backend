@@ -1,0 +1,21 @@
+# Development configuration with default values
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: dummy-client-id
+            client-secret: dummy-client-secret
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: noreply@uniqwrites.com
+    password: dummy-password
+
+# Additional configuration for development
+app:
+  oauth:
+    google:
+      client-id: dummy-client-id
+      client-secret: dummy-client-secret

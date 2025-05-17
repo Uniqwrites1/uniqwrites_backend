@@ -16,9 +16,17 @@
    - Signup method now generates token for auto-login
    - Google login and forgot password also use standard response format
 
-4. **Added API Documentation**
+4. **Added Multiple Path Support for Frontend Requests**
+   - Created ApiAuthPathController to handle /api/* path requests
+   - Updated security configuration to allow multiple path patterns
+   - Now supporting 3 paths for each endpoint:
+     - Direct (e.g., /login)
+     - API-prefixed (e.g., /api/login) - NEW
+     - API/Auth-prefixed (e.g., /api/auth/login)
+
+5. **Added API Documentation**
    - Created AUTH_API_DOCS.md with detailed response format info
-   - Updated FRONTEND_API_GUIDE.md with new token handling examples
+   - Updated FRONTEND_API_GUIDE.md with new path options for API calls
 
 ## Testing Your Changes
 

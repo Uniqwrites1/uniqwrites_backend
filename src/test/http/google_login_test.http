@@ -1,0 +1,66 @@
+# Google OAuth2 Authentication Tests
+
+### Test direct Google login endpoint
+POST http://localhost:8080/google/login
+Content-Type: application/json
+
+{
+  "email": "test.user@gmail.com",
+  "name": "Test User",
+  "googleId": "118234567890",
+  "role": "STUDENT",
+  "token": "mock_google_token",
+  "picture": "https://lh3.googleusercontent.com/a/profile-picture"
+}
+
+### Test API-prefixed Google login endpoint
+POST http://localhost:8080/api/auth/google/login
+Content-Type: application/json
+
+{
+  "email": "test.teacher@gmail.com",
+  "name": "Test Teacher",
+  "googleId": "118234567899",
+  "role": "TEACHER",
+  "token": "mock_google_token_for_teacher",
+  "picture": "https://lh3.googleusercontent.com/a/teacher-picture"
+}
+
+### Test Google login with parent role
+POST http://localhost:8080/google/login
+Content-Type: application/json
+
+{
+  "email": "test.parent@gmail.com",
+  "name": "Test Parent",
+  "googleId": "118234567891",
+  "role": "PARENT",
+  "token": "mock_google_token_for_parent",
+  "picture": "https://lh3.googleusercontent.com/a/parent-picture"
+}
+
+### Test Google login with school role
+POST http://localhost:8080/google/login
+Content-Type: application/json
+
+{
+  "email": "test.school@gmail.com",
+  "name": "Test School Admin",
+  "googleId": "118234567892",
+  "role": "SCHOOL_ADMIN",
+  "token": "mock_google_token_for_school",
+  "picture": "https://lh3.googleusercontent.com/a/school-picture"
+}
+
+### Test Google login with admin role
+POST http://localhost:8080/google/login
+Content-Type: application/json
+
+{
+  "email": "test.admin@gmail.com",
+  "name": "Test Admin",
+  "googleId": "118234567893",
+  "role": "ADMIN",
+  "token": "mock_google_token_for_admin",
+  "picture": "https://lh3.googleusercontent.com/a/admin-picture"
+}

@@ -9,12 +9,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * Controller that handles requests to the root-level auth paths.
- * This controller exists to capture API requests that don't include the '/api/' prefix
+ * Controller that handles requests to the API-prefixed auth paths.
+ * This controller exists to capture API requests that include the '/api/' prefix
  * and forward them to the proper AuthController. This helps with frontend compatibility.
  */
 @RestController
-public class AuthPathController {    @Autowired
+@RequestMapping("/api")
+public class ApiAuthPathController {    @Autowired
     private AuthController authController;
     
     @Autowired
@@ -24,7 +25,7 @@ public class AuthPathController {    @Autowired
     private PasswordResetController passwordResetController;
 
     /**
-     * Handle login requests at /login path (without /api/auth prefix)
+     * Handle login requests at /api/login path
      */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequest) {
@@ -32,20 +33,20 @@ public class AuthPathController {    @Autowired
     }
 
     /**
-     * Handle signup requests at /signup path (without /api/auth prefix)
+     * Handle signup requests at /api/signup path
      */
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignupRequestDTO signupRequest) {
         return authController.signup(signupRequest);
     }    /**
-     * Handle Google login requests at /google/login path (without /api/auth prefix)
+     * Handle Google login requests at /api/google/login path
      */
     @PostMapping("/google/login")
     public ResponseEntity<?> googleLogin(@RequestBody GoogleLoginRequestDTO googleLoginRequest) {
         // Forward directly to GoogleAuthController to avoid delegation chain
         return googleAuthController.authenticateWithGoogle(googleLoginRequest);
     }    /**
-     * Handle forgot password requests at /forgot-password path (without /api/auth prefix)
+     * Handle forgot password requests at /api/forgot-password path
      */
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody PasswordResetTokenRequest request) {

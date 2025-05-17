@@ -1,0 +1,48 @@
+# API Auth Path Testing
+
+### Test API prefixed login endpoint
+POST http://localhost:8080/api/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+### Test API prefixed signup endpoint
+POST http://localhost:8080/api/signup
+Content-Type: application/json
+
+{
+  "name": "Test User",
+  "email": "newuser@example.com",
+  "password": "password123",
+  "role": "STUDENT"
+}
+
+### Test API prefixed Google login endpoint
+POST http://localhost:8080/api/google/login
+Content-Type: application/json
+
+{
+  "token": "google_id_token",
+  "email": "google_user@gmail.com"
+}
+
+### Test API prefixed forgot password endpoint
+POST http://localhost:8080/api/forgot-password
+Content-Type: application/json
+
+{
+  "email": "test@example.com"
+}
+
+### Test with Origin header (CORS check)
+POST http://localhost:8080/api/login
+Content-Type: application/json
+Origin: http://localhost:5173
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}

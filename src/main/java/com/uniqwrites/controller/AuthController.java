@@ -1,12 +1,16 @@
 package com.uniqwrites.controller;
 
 import com.uniqwrites.dto.AuthResponseDTO;
+import com.uniqwrites.dto.GoogleLoginRequestDTO;
 import com.uniqwrites.dto.LoginRequestDTO;
+import com.uniqwrites.dto.PasswordResetTokenRequest;
 import com.uniqwrites.dto.SignupRequestDTO;
 import com.uniqwrites.model.Role;
 import com.uniqwrites.model.User;
 import com.uniqwrites.security.JwtUtil;
 import com.uniqwrites.service.UserService;
+
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,15 +20,22 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-
+    
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private GoogleAuthController googleAuthController;
+    
+    @Autowired
+    private PasswordResetController passwordResetController;
     
     @GetMapping("/test")
     public ResponseEntity<?> testEndpoint() {
@@ -35,7 +46,8 @@ public class AuthController {
     private JwtUtil jwtUtil;
 
     @Autowired
-    private AuthenticationManager authenticationManager;    @PostMapping("/signup")
+    private AuthenticationManager authenticationManager;    
+    @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignupRequestDTO signupRequest) {
         try {
             User user = userService.registerUser(signupRequest);
@@ -53,7 +65,8 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(AuthResponseDTO.error(e.getMessage()));
         }
-    }    @PostMapping("/login")
+    }    
+    @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequest) {
         try {
             authenticationManager.authenticate(
@@ -80,50 +93,36 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body(AuthResponseDTO.error("Authentication error: " + e.getMessage()));
         }
-    }
-      /**
-     * Handle Google login requests
+    }      /**
+     * This method was removed to resolve mapping conflicts with GoogleAuthController
+     * Google authentication is now handled by GoogleAuthController.authenticateWithGoogle
      */
-    @PostMapping("/google/login")
-    public ResponseEntity<?> googleLogin(@RequestBody Object googleLoginRequest) {
-        try {
-            // This is a placeholder - implement actual Google login logic
-            // For now, create a mock success response
-            AuthResponseDTO response = new AuthResponseDTO();
-            response.setSuccess(true);
-            response.setToken("mock_token_for_google_login");
-            response.setMessage("Google login successful");
-            response.setRole("STUDENT");
-            response.setName("Google User");
-            response.setEmail("google_user@example.com");
-            
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(AuthResponseDTO.error("Google authentication failed: " + e.getMessage()));
-        }
-    }
+    // NOTE: Google authentication endpoint was moved to GoogleAuthController
     
     /**
      * Handle forgot password requests
-     */    @PostMapping("/forgot-password") 
+     * This method is deprecated. Use PasswordResetController instead.
+     */
+    // @PostMapping("/forgot-password") - Removed to resolve mapping conflict
     public ResponseEntity<?> forgotPassword(@RequestBody Object forgotPasswordRequest) {
-        try {
-            // This is a placeholder - implement actual forgot password logic
-            return ResponseEntity.ok(
-                new AuthResponseDTO(
-                    true, 
-                    null, 
-                    "Password reset email sent", 
-                    null, 
-                    null, 
-                    null
-                )
-            );
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(
-                AuthResponseDTO.error("Failed to process password reset request: " + e.getMessage())
-            );
+        // This method is now handled by PasswordResetController
+        // Kept here for backward compatibility with ApiAuthPathController
+        if (forgotPasswordRequest instanceof Map) {
+            try {
+                Map<String, Object> requestMap = (Map<String, Object>) forgotPasswordRequest;
+                String email = (String) requestMap.get("email");
+                PasswordResetTokenRequest request = new PasswordResetTokenRequest();
+                request.setEmail(email);
+                return passwordResetController.forgotPassword(request);
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body(
+                    AuthResponseDTO.error("Failed to process password reset request: " + e.getMessage())
+                );
+            }
         }
+        return ResponseEntity.badRequest().body(
+            AuthResponseDTO.error("Invalid password reset request format")
+        );
     }
 
     @PostMapping("/logout")
@@ -178,5 +177,39 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    /**
+     * Google login handler - delegates to GoogleAuthController
+     * This method exists for backward compatibility with path controllers
+     * that expect this method to exist in AuthController
+     * 
+     * @param googleLoginRequest The request containing Google authentication details
+     * @return Authentication response with JWT token
+     */
+    public ResponseEntity<?> googleLogin(@RequestBody Object googleLoginRequest) {
+        // Convert Object to GoogleLoginRequestDTO and delegate
+        if (googleLoginRequest instanceof Map) {
+            try {
+                // Handle map conversion for path controllers
+                Map<String, Object> requestMap = (Map<String, Object>) googleLoginRequest;
+                GoogleLoginRequestDTO dto = new GoogleLoginRequestDTO();
+                
+                // Extract properties from map
+                if (requestMap.containsKey("email")) dto.setEmail((String) requestMap.get("email"));
+                if (requestMap.containsKey("name")) dto.setName((String) requestMap.get("name"));
+                if (requestMap.containsKey("googleId")) dto.setGoogleId((String) requestMap.get("googleId"));
+                if (requestMap.containsKey("role")) dto.setRole((String) requestMap.get("role"));                if (requestMap.containsKey("token")) dto.setToken((String) requestMap.get("token"));
+                if (requestMap.containsKey("picture")) dto.setPicture((String) requestMap.get("picture"));
+                
+                return googleAuthController.authenticateWithGoogle(dto);
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body(
+                    AuthResponseDTO.error("Invalid Google login request format: " + e.getMessage()));
+            }
+        }
+        
+        return ResponseEntity.badRequest().body(
+            AuthResponseDTO.error("Unsupported Google login request format"));
     }
 }
